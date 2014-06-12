@@ -1,11 +1,13 @@
 var express = require('express');
 var jsdom = require("jsdom");
 var request = require('request');
+var db = require('./config/db');
+var Posts = require('./models/posts');
 
 var app = express();
 
-
 var BASE_URL = 'http://www.producthunt.com/';
+
 
 app.configure(function(){
   app.set('port', process.env.PORT || 8888);
@@ -22,6 +24,51 @@ app.get('/', function(req, res) {
 
 app.get('/today', function(req, res) {
 
+  var today = new Date().toJSON().slice(0,10);
+
+  Posts.findOne({date: today}, function(err, obj) {
+    
+    if (obj && obj.expires < Date.now()) {
+      // post expired, scrape again, and save
+      console.log("posts expired - " + today);
+      scrapeSaveSend(function(posts) {
+        Posts.findOneAndUpdate({date: today}, {posts: posts, expires: new Date(Date.now() + 60*60*1000)}, {new: true}, function(err, newObj) {
+          res.send(200, {
+            status: 'success',
+            hunts: posts
+          }); 
+        });
+      });
+    } else if (obj) {
+      console.log("posts not expired - " + today);
+      // not expired, just return this
+      res.send(200, {
+        status: 'success',
+        hunts: obj.posts
+      }); 
+    } else {
+      // not in the db, scrape and send
+      console.log("posts not found in db - " + today);
+
+      scrapeSaveSend(function(posts) {
+        new Posts({
+          date: today,
+          posts: posts
+        }).save(function(err) {
+          res.send(200, {
+            status: 'success',
+            hunts: posts
+          }); 
+        });
+      });
+      
+    }
+
+  });
+
+});
+
+function scrapeSaveSend(callback) {
   var posts = [];
 
   jsdom.env(
@@ -53,7 +100,7 @@ app.get('/today', function(req, res) {
               'username': username,
               'name': name
             },
-            'rank': rank,
+            'rank': rank + 1,
             'tagline': tagline,
             'comments': comments,
             'permalink': permalink,
@@ -61,10 +108,7 @@ app.get('/today', function(req, res) {
           });
 
           if (posts.length === $ph_posts.length) {
-            res.send(200, {
-              status: 'success',
-              hunts: posts
-            });
+            callback(posts);
           }
 
         });
@@ -72,7 +116,6 @@ app.get('/today', function(req, res) {
       });
     }
   );
-
-});
+}
 
 app.listen(app.get('port'));
