@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/karan/Hook",
   "dependencies": {
+    "express": "3.4.7",
     "jsdom": "^0.10.6"
   }
 }
