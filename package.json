@@ -1,11 +1,9 @@
 {
   "name": "Hook",
+  "private": true,
   "version": "0.0.0",
   "description": "ProductHunt API for retrieving today's hunts",
   "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/karan/Hook.git"
