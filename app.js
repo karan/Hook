@@ -18,7 +18,7 @@ app.configure(function(){
 
 
 app.get('/', function(req, res) {
-  res.send('Works');
+  res.redirect('https://github.com/karan/Hook');
 });
 
 
