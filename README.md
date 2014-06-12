@@ -3,7 +3,7 @@
 Hook
 ====
 
-ProductHunt API for retrieving today's hunts
+ProductHunt API for retrieving today's hunts. Posts are cached for 60 minutes.
 
 Usage
 =====
