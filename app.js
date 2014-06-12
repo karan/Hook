@@ -1,3 +1,4 @@
+require('newrelic');
 var express = require('express');
 var jsdom = require("jsdom");
 var request = require('request');
