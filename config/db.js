@@ -1,9 +1,8 @@
 // Established database connection
 
-var mongoose = require('mongoose'),
-    constants = require('./constants');
+var mongoose = require('mongoose');
 
-var dbURI = constants.mongooseURI;
+var dbURI = process.env.MONGOLAB_URI;
 mongoose.connect(dbURI);
 
 // when connected with db
