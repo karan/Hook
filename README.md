@@ -5,8 +5,6 @@ Hook
 
 ProductHunt API for retrieving today's hunts and comments for any post. 
 
-*If you are using Hook, please let me know and I'll showcase your app here.*
-
 Usage
 =====
 
@@ -94,6 +92,17 @@ Response:
     ...
     ...
 ```
+
+Expo
+=======
+
+Some apps built using this API:
+
+| Name | Description | URL |
+| ---- | ---- | ---- |
+| alfred-producthunt-workflow | Product Hunt Workflow for Alfred 2.0 | https://github.com/loris/alfred-producthunt-workflow |
+
+*If you are using Hook, please let me know and I'll showcase your app here.*
 
 Start
 =====
