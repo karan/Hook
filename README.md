@@ -53,7 +53,7 @@ Response:
 
 Comments are cached for 120 minutes.
 
-#### `GET :permalink`
+#### `GET /:permalink`
 
 Example Query:
 
