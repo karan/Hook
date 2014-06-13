@@ -30,3 +30,4 @@ process.on('SIGINT', function() {
 
 // bring in all models
 require('./../models/posts');
+require('./../models/comments');
