@@ -4,6 +4,7 @@ var jsdom = require("jsdom");
 var request = require('request');
 var db = require('./config/db');
 var Posts = require('./models/posts');
+var Comments = require('./models/comments');
 
 var app = express();
 
@@ -74,12 +75,50 @@ app.get("/posts/:slug", function (req, res) {
 
   var post_url = '/posts/'+req.params.slug;
 
-  getPostDetails(post_url, function (post) {
-    post = post[0];
-    console.log(post);
-    getComments(post_url, function (err, comments) {
-      res.send(comments);
-    });
+  Comments.findOne({'permalink': post_url}, function(err, commentobj) {
+
+    if (commentobj && commentobj.expires < Date.now()) {
+      // expired. Scrape again, save and send
+      getPostDetails(post_url, function (post) {
+        post = post[0];
+        getComments(post_url, function (err, comments, related) {
+          Comments.findOneAndUpdate({permalink: post_url}, {post: post, comments: comments, expires: new Date(Date.now() + 2*60*60*1000)}, function (err, newObj) {
+            res.send(200, {
+              status: 'success',
+              post: post,
+              comments: comments
+            }); 
+          });
+        });
+      });
+    } else if (commentobj) {
+      // not expired, just send response
+      res.send(200, {
+        status: 'success',
+        post: commentobj.post,
+        comments: commentobj.comments
+      });
+    } else {
+      // not in db, scrape, save and send
+      getPostDetails(post_url, function (post) {
+        post = post[0];
+        getComments(post_url, function (err, comments, related) {
+          new Comments({
+            post: post,
+            permalink: post.permalink,
+            comments: comments
+          }).save(function(err) {
+            res.send(200, {
+              status: 'success',
+              post: post,
+              comments: comments
+            });
+          });
+        });
+      });
+
+    }
+
   });
 
 });
@@ -96,9 +135,12 @@ function getComments(url, callback) {
       var comments = [];
 
       var comments_dom = $(".modal-container").find(".comment");
-      
-      comments_dom.each(function (index) {
 
+      if (comments_dom.length === 0) {
+        return callback(null, comments);
+      }
+          
+      comments_dom.each(function (index) {
         var name = $(this).find(".comment-user-name a").text();
         var username = $(this).find(".comment-user-handle").text().match(/\(\@(.*)\)/)[1];
         var timestamp = $(this).find(".comment-timestamp").text();
@@ -121,6 +163,7 @@ function getComments(url, callback) {
         }
 
       });
+  
     }
   );
 
@@ -130,8 +173,6 @@ function getComments(url, callback) {
 function getPostDetails(post_url, callback) {
   var url = post_url ? BASE_URL + post_url : BASE_URL;
   
-  console.log(url);
-
   var posts = [];
 
   jsdom.env(
