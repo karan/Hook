@@ -5,6 +5,8 @@ Hook
 
 ProductHunt API for retrieving today's hunts. Posts are cached for 60 minutes.
 
+*If you are using Hook, please let me know and I'll showcase your app here.*
+
 Usage
 =====
 
