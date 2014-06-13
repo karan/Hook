@@ -2,7 +2,7 @@
   "name": "Hook",
   "private": true,
   "version": "0.0.0",
-  "description": "ProductHunt API for retrieving today's hunts",
+  "description": "ProductHunt API",
   "main": "app.js",
   "repository": {
     "type": "git",

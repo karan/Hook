@@ -3,7 +3,7 @@
 Hook
 ====
 
-ProductHunt API for retrieving today's hunts. Posts are cached for 60 minutes.
+ProductHunt API for retrieving today's hunts and comments for any post. 
 
 *If you are using Hook, please let me know and I'll showcase your app here.*
 
@@ -15,6 +15,8 @@ Usage
 **Output:** JSON
 
 ### Get today's products
+
+Posts are cached for 60 minutes.
 
 #### `GET /today`
 
@@ -42,6 +44,52 @@ Response:
       },
       "votes": 48,
       "title": "The News (iOS)"
+    },
+    ...
+    ...
+```
+
+### Get comments for any post
+
+Comments are cached for 120 minutes.
+
+#### `GET :permalink`
+
+Example Query:
+
+```
+http://hook-api.herokuapp.com/posts/hook-producthunt-api
+```
+
+Response:
+
+```json
+
+{
+  "status": "success",
+  "post": {
+    "url": "https://github.com/karan/Hook",
+    "permalink": "/posts/hook-producthunt-api",
+    "comment_count": "10",
+    "tagline": "ProductHunt API for retrieving today's hunts",
+    "rank": 1,
+    "user": {
+      "name": "Karan Goel",
+      "username": "karangoel"
+    },
+    "votes": 46,
+    "title": "Hook - ProductHunt API"
+  },
+  "comments": [
+    {
+      "comment_html": "\n          \n          Yo guys. I have been toying with a scraper for PH for some time now, and was really motivated after seeing <a href=\"https://twitter.com/TosinAF\">@TosinAF</a> 's <a href=\"http://www.producthunt.com/posts/the-news-ios\">thread</a> and packaged all I had in a neat API.<br><br><a href=\"http://hook-api.herokuapp.com/today\">Try it here</a><br><br>Currently it gets today's posts, and has a cache of 1 hour. I hope to see people make a ton of good stuff with it. :)<br><br>PS: I make a lot of cool stuff, and people love it. <a href=\"http://www.goel.im/#subscribe\">Leave your e-mail here</a> and stay tuned about my projects.\n        ",
+      "comment": "\n          \n          Yo guys. I have been toying with a scraper for PH for some time now, and was really motivated after seeing @TosinAF 's thread and packaged all I had in a neat API.Try it hereCurrently it gets today's posts, and has a cache of 1 hour. I hope to see people make a ton of good stuff with it. :)PS: I make a lot of cool stuff, and people love it. Leave your e-mail here and stay tuned about my projects.\n        ",
+      "timestamp": "7h ago",
+      "user": {
+        "name": "Karan Goel",
+        "username": "karangoel"
+      },
+      "index": 1
     },
     ...
     ...
