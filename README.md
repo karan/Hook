@@ -5,6 +5,8 @@ Hook
 
 ProductHunt API for retrieving today's hunts and comments for any post. 
 
+*Note: This is an unofficial API and __not__ supported or controlled by ProductHunt itself. Any questions, comments, feedback or feature requests should be directed to [karan](http://github.com/karan) or via an [issue](https://github.com/karan/Hook/issues) in this repo.*
+
 Usage
 =====
 
