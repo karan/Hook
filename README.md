@@ -5,6 +5,8 @@ Hook
 
 ProductHunt API for retrieving today's hunts and comments for any post. 
 
+There is now an Objective-C Wrapper called, [PHManager](https://github.com/TosinAF/PHManager) for this API.
+
 *Note: This is an unofficial API and __not__ supported or controlled by ProductHunt itself. Any questions, comments, feedback or feature requests should be directed to [karan](http://github.com/karan) or via an [issue](https://github.com/karan/Hook/issues) in this repo.*
 
 Usage
@@ -104,6 +106,7 @@ Some apps built using this API:
 | ---- | ---- | ---- |
 | alfred-producthunt-workflow | Product Hunt Workflow for Alfred 2.0 | https://github.com/loris/alfred-producthunt-workflow |
 | PH | Product Hunt Android App | https://github.com/yelinaung/PH |
+| TheNews (iOS) | PH, DN, Hn, now on iOS | https://appsto.re/us/PpnV0.i |
 
 *If you are using Hook, please let me know and I'll showcase your app here.*
 
