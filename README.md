@@ -5,7 +5,7 @@ Hook
 
 ProductHunt API for retrieving today's hunts and comments for any post. 
 
-*If you are using Hook, please let me know and I'll showcase your app here.*
+*Note: This is an unofficial API and __not__ supported or controlled by ProductHunt itself. Any questions, comments, feedback or feature requests should be directed to [karan](http://github.com/karan) or via an [issue](https://github.com/karan/Hook/issues) in this repo.*
 
 Usage
 =====
@@ -53,7 +53,7 @@ Response:
 
 Comments are cached for 120 minutes.
 
-#### `GET :permalink`
+#### `GET /:permalink`
 
 Example Query:
 
@@ -95,6 +95,21 @@ Response:
     ...
 ```
 
+Expo
+=======
+
+Some apps built using this API:
+
+| Name | Description | URL |
+| ---- | ---- | ---- |
+| alfred-producthunt-workflow | Product Hunt Workflow for Alfred 2.0 | https://github.com/loris/alfred-producthunt-workflow |
+| PH | Product Hunt Android App | https://github.com/yelinaung/PH |
+| TheNews (iOS) | PH, DN, Hn, now on iOS | https://appsto.re/us/PpnV0.i |
+| ProductHuntExtn | Today View Extension for Product Hunt (Yosemite) | https://github.com/zameericle/ProductHuntExtn |
+| ProductHunt (iOS) | iOS App for producthunt.co | https://github.com/sapanbhuta/ProductHunt |
+
+*If you are using Hook, please let me know and I'll showcase your app here.*
+
 Start
 =====
 
@@ -113,4 +128,12 @@ $ heroku addons:add mongolab
 $ (git add, git commit)
 $ git push heroku master
 ```
+
+Donation
+=======
+
+Donations to my open source work is greatly appreciated and helps me dedicate more time and energy into making cool things. If you want to help me produce this work as well as more like it, please take a moment to contribute.
+
+- Bitcoin: 1GZqi6qUGSKGQvjd4CvVBJ9FYpsQvU2P7h
+- Gittip: https://www.gittip.com/karan/
 
