@@ -53,6 +53,7 @@ app.get('/today', function (req, res) {
       console.log("posts not found in db - " + today);
 
       getPostDetails(null, function (posts) {
+        console.log("got details");
         new Posts({
           date: today,
           posts: posts
@@ -172,7 +173,7 @@ function getComments(url, callback) {
 
 function getPostDetails(post_url, callback) {
   var url = post_url ? BASE_URL + post_url : BASE_URL;
-  
+  console.log(url);
   var posts = [];
 
   jsdom.env(
@@ -182,7 +183,8 @@ function getPostDetails(post_url, callback) {
       var $ = window.$;
 
       var container = post_url ? $(".modal-container") : null;
-      var $ph_posts = post_url ? $(".modal-container .posts-group tr") : $(".todays-posts tr");
+      var $ph_posts = post_url ? $(".modal-container .posts-group tr") : $(".today tr");
+
       $ph_posts.each(function (rank) {
 
         var votes = +$(this).find(".upvote").text();
