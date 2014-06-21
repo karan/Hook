@@ -107,6 +107,7 @@ Some apps built using this API:
 | TheNews (iOS) | PH, DN, Hn, now on iOS | https://appsto.re/us/PpnV0.i |
 | ProductHuntExtn | Today View Extension for Product Hunt (Yosemite) | https://github.com/zameericle/ProductHuntExtn |
 | ProductHunt (iOS) | iOS App for producthunt.co | https://github.com/sapanbhuta/ProductHunt |
+| Spear | Product Hunt for Hackers - a CLI to Product Hunt. | https://github.com/karan/Spear |
 
 *If you are using Hook, please let me know and I'll showcase your app here.*
 
