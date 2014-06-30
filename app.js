@@ -102,7 +102,7 @@ app.get("/posts/:slug", function (req, res) {
     } else {
       // not in db, scrape, save and send
       getPostDetails(post_url, function (post) {
-        post = post[0];
+        console.log(post);
         getComments(post_url, function (err, comments, related) {
           new Comments({
             post: post,
@@ -138,43 +138,32 @@ function getPostDetails(post_url, callback) {
       var header_dom = $(".modal-container").find(".comments-header");
 
       var votes = +header_dom.find(".vote-count").text()
-      var name = header_dom.find(".posted-by").text().trim().replace(/"/g, "");
-      var username = header_dom.find(".user-with-tooltip").attr("href").slice(1).trim().replace(/"/g, "").match("Posted\sby\s(.*)\s\d+\shours\sago");
-      console.log(username);
-      var title = $(this).find(".post-url").text();
-      var tagline = $(this).find(".post-tagline").text();
+      var name = /Posted by (.*) \d+ .*/g.exec(header_dom.find(".posted-by").text().trim().replace(/"/g, ""))[1];
+      var username = header_dom.find(".user-with-tooltip").attr("href").slice(1).trim().replace(/"/g, "");
+      var title = header_dom.find(".post-url").text();
+      var tagline = header_dom.find(".post-tagline").text();
       
-      if (container) {
-        var comment_count = $(container.find(".subhead")[2]).text().trim().match(/(\d+)/g);
-      } else {
-        var comment_count = $(this).find(".view-discussion").text().trim().match(/(\d+)/g);
-      }
+      var comment_count = $($(".modal-container").find(".subhead")[2]).text().trim().match(/(\d+)/g);
       comment_count = comment_count ? comment_count[0] : 0; 
 
-      var permalink = post_url ? post_url : $(this).find(".view-discussion").attr("data-url");
+      var permalink = post_url;
       
-      request({url: BASE_URL+$(this).find(".post-url").attr("href"), followRedirect: false}, function (error, response, body) {
+      request({url: BASE_URL+header_dom.find(".post-url").attr("href"), followRedirect: false}, function (error, response, body) {
         url = response.headers.location;
 
-        posts.push({
+        callback({
           'title': title,
           'votes': votes,
           'user': {
             'username': username,
             'name': name
           },
-          'rank': rank + 1,
+          'rank': 1,
           'tagline': tagline,
           'comment_count': comment_count,
           'permalink': permalink,
           'url': url
         });
-
-        console.log(posts);
-
-        if (posts.length === $ph_posts.length) {
-          callback(posts);
-        }
 
       });
 
