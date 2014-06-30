@@ -33,7 +33,7 @@ app.get('/today', function (req, res) {
     if (obj && obj.expires < Date.now()) {
       // post expired, scrape again, and save
       console.log("posts expired - " + today);
-      getPostDetails(null, function (posts) {
+      getHomePosts(null, function (posts) {
         Posts.findOneAndUpdate({date: today}, {posts: posts, expires: new Date(Date.now() + 60*60*1000)}, {new: true}, function (err, newObj) {
           res.send(200, {
             status: 'success',
@@ -52,7 +52,7 @@ app.get('/today', function (req, res) {
       // not in the db, scrape and send
       console.log("posts not found in db - " + today);
 
-      getPostDetails(null, function (posts) {
+      getHomePosts(null, function (posts) {
         console.log("got details");
         new Posts({
           date: today,
@@ -125,6 +125,64 @@ app.get("/posts/:slug", function (req, res) {
 });
 
 
+function getPostDetails(post_url, callback) {
+  var url = post_url ? BASE_URL + post_url : BASE_URL;
+  console.log(url);
+
+  jsdom.env(
+    url,
+    ["http://code.jquery.com/jquery.js"],
+    function (errors, window) {
+      var $ = window.$;
+
+      var header_dom = $(".modal-container").find(".comments-header");
+
+      var votes = +header_dom.find(".vote-count").text()
+      var name = header_dom.find(".posted-by").text().trim().replace(/"/g, "");
+      var username = header_dom.find(".user-with-tooltip").attr("href").slice(1).trim().replace(/"/g, "").match("Posted\sby\s(.*)\s\d+\shours\sago");
+      console.log(username);
+      var title = $(this).find(".post-url").text();
+      var tagline = $(this).find(".post-tagline").text();
+      
+      if (container) {
+        var comment_count = $(container.find(".subhead")[2]).text().trim().match(/(\d+)/g);
+      } else {
+        var comment_count = $(this).find(".view-discussion").text().trim().match(/(\d+)/g);
+      }
+      comment_count = comment_count ? comment_count[0] : 0; 
+
+      var permalink = post_url ? post_url : $(this).find(".view-discussion").attr("data-url");
+      
+      request({url: BASE_URL+$(this).find(".post-url").attr("href"), followRedirect: false}, function (error, response, body) {
+        url = response.headers.location;
+
+        posts.push({
+          'title': title,
+          'votes': votes,
+          'user': {
+            'username': username,
+            'name': name
+          },
+          'rank': rank + 1,
+          'tagline': tagline,
+          'comment_count': comment_count,
+          'permalink': permalink,
+          'url': url
+        });
+
+        console.log(posts);
+
+        if (posts.length === $ph_posts.length) {
+          callback(posts);
+        }
+
+      });
+
+    }
+  );
+}
+
+
 function getComments(url, callback) {
 
   jsdom.env(
@@ -135,7 +193,7 @@ function getComments(url, callback) {
 
       var comments = [];
 
-      var comments_dom = $(".modal-container").find(".comment");
+      var comments_dom = $(".modal-container");
 
       if (comments_dom.length === 0) {
         return callback(null, comments);
@@ -171,7 +229,7 @@ function getComments(url, callback) {
 }
 
 
-function getPostDetails(post_url, callback) {
+function getHomePosts(post_url, callback) {
   var url = post_url ? BASE_URL + post_url : BASE_URL;
   console.log(url);
   var posts = [];
@@ -218,6 +276,8 @@ function getPostDetails(post_url, callback) {
             'permalink': permalink,
             'url': url
           });
+
+          console.log(posts);
 
           if (posts.length === $ph_posts.length) {
             callback(posts);
