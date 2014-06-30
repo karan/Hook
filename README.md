@@ -5,6 +5,8 @@ Hook
 
 ProductHunt API for retrieving today's hunts and comments for any post. 
 
+Discussion on [Product Hunt](http://www.producthunt.com/posts/hook-producthunt-api).
+
 *Note: This is an unofficial API and __not__ supported or controlled by ProductHunt itself. Any questions, comments, feedback or feature requests should be directed to [karan](http://github.com/karan) or via an [issue](https://github.com/karan/Hook/issues) in this repo.*
 
 Usage
@@ -107,6 +109,7 @@ Some apps built using this API:
 | TheNews (iOS) | PH, DN, Hn, now on iOS | https://appsto.re/us/PpnV0.i |
 | ProductHuntExtn | Today View Extension for Product Hunt (Yosemite) | https://github.com/zameericle/ProductHuntExtn |
 | ProductHunt (iOS) | iOS App for producthunt.co | https://github.com/sapanbhuta/ProductHunt |
+| Spear | Product Hunt for Hackers - a CLI to Product Hunt. | https://github.com/karan/Spear |
 
 *If you are using Hook, please let me know and I'll showcase your app here.*
 
