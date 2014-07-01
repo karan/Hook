@@ -182,13 +182,15 @@ function getComments(url, callback) {
 
       var comments = [];
 
-      var comments_dom = $(".modal-container");
+      var comments_dom = $(".comment-thread");
 
       if (comments_dom.length === 0) {
         return callback(null, comments);
       }
           
       comments_dom.each(function (index) {
+        var this_comments = $(this).find(".comment");
+        
         var name = $(this).find(".comment-user-name a").text();
         var username = $(this).find(".comment-user-handle").text().match(/\(\@(.*)\)/)[1];
         var timestamp = $(this).find(".comment-timestamp").text();
