@@ -148,14 +148,11 @@ function getPostDetails(post_url, callback) {
       var header_dom = $(".comments-header");
 
       var votes = +header_dom.find(".vote-count").text();
-      console.log(votes);
       var name = /Posted by (.*) \d+ .*/g.exec(header_dom.find(".posted-by").text().trim().replace(/"/g, ""))[1];
       var username = header_dom.find(".user-with-tooltip").attr("href").slice(1).trim().replace(/"/g, "");
       var title = header_dom.find(".post-url").text();
       var tagline = header_dom.find(".post-tagline").text();
 
-      console.log(title);
-      
       var comment_count = $($(".modal-container").find(".subhead")[2]).text().trim().match(/(\d+)/g);
       comment_count = comment_count ? comment_count[0] : 0;
 
