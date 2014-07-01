@@ -80,8 +80,9 @@ app.get("/posts/:slug", function (req, res) {
 
     if (commentobj && commentobj.expires < Date.now()) {
       // expired. Scrape again, save and send
+      console.log("expired");
       getPostDetails(post_url, function (post) {
-        post = post[0];
+        console.log(post);
         getComments(post_url, function (err, comments, related) {
           Comments.findOneAndUpdate({permalink: post_url}, {post: post, comments: comments, expires: new Date(Date.now() + 2*60*60*1000)}, function (err, newObj) {
             res.send(200, {
@@ -93,6 +94,7 @@ app.get("/posts/:slug", function (req, res) {
         });
       });
     } else if (commentobj) {
+      console.log("in db - fine");
       // not expired, just send response
       res.send(200, {
         status: 'success',
@@ -100,6 +102,7 @@ app.get("/posts/:slug", function (req, res) {
         comments: commentobj.comments
       });
     } else {
+      console.log("not in db");
       // not in db, scrape, save and send
       getPostDetails(post_url, function (post) {
         console.log(post);
@@ -133,18 +136,28 @@ function getPostDetails(post_url, callback) {
     url,
     ["http://code.jquery.com/jquery.js"],
     function (errors, window) {
+
+      if (errors) {
+        console.log(errors);
+      }
+      console.log(window.title);
       var $ = window.$;
 
-      var header_dom = $(".modal-container").find(".comments-header");
+      console.log($);
 
-      var votes = +header_dom.find(".vote-count").text()
+      var header_dom = $(".comments-header");
+
+      var votes = +header_dom.find(".vote-count").text();
+      console.log(votes);
       var name = /Posted by (.*) \d+ .*/g.exec(header_dom.find(".posted-by").text().trim().replace(/"/g, ""))[1];
       var username = header_dom.find(".user-with-tooltip").attr("href").slice(1).trim().replace(/"/g, "");
       var title = header_dom.find(".post-url").text();
       var tagline = header_dom.find(".post-tagline").text();
+
+      console.log(title);
       
       var comment_count = $($(".modal-container").find(".subhead")[2]).text().trim().match(/(\d+)/g);
-      comment_count = comment_count ? comment_count[0] : 0; 
+      comment_count = comment_count ? comment_count[0] : 0;
 
       var permalink = post_url;
       
@@ -191,26 +204,43 @@ function getComments(url, callback) {
       comments_dom.each(function (index) {
         var this_comments = $(this).find(".comment");
         
-        var name = $(this).find(".comment-user-name a").text();
-        var username = $(this).find(".comment-user-handle").text().match(/\(\@(.*)\)/)[1];
-        var timestamp = $(this).find(".comment-timestamp").text();
-        var comment = $(this).find(".comment-body").find(".comment-user-name").remove().end().text();
-        var comment_html = $(this).find(".comment-body").find(".comment-user-name").remove().end().html();
+        this_comments.each(function (com_count) {
+          var username = $(this).find(".comment-body").data("comment-by").match(/\(\@(.*)\)/)[1];
+          var name = $(this).find(".comment-user-name a").text();
+          var comment = $(this).find(".actual-comment").text();
+          var comment_html = $(this).find(".actual-comment").html();
 
-        comments.push({
-          index: index+1,
-          user: {
-            username: username,
-            name: name
-          },
-          timestamp: timestamp,
-          comment: comment,
-          comment_html: comment_html
+          console.log(username + "--" + name);
+            
+          if (com_count === 0) {
+            // Get the top level comment
+            comments.push({
+              index: index+1,
+              user: {
+                username: username,
+                name: name
+              },
+              comment: comment,
+              comment_html: comment_html,
+              children: []
+            });
+          } else {
+            // Get the child comment
+            comments[comments.length-1].children.push({
+              index: com_count+1,
+              user: {
+                username: username,
+                name: name
+              },
+              comment: comment,
+              comment_html: comment_html
+            });
+          }
+
+          if (comments.length === comments_dom.length) {
+            callback(null, comments);
+          }
         });
-
-        if (comments.length === comments_dom.length) {
-          callback(null, comments);
-        }
 
       });
   
