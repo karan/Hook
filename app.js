@@ -1,10 +1,10 @@
-require('newrelic');
 var express = require('express');
 var jsdom = require("jsdom");
 var request = require('request');
 var db = require('./config/db');
 var Posts = require('./models/posts');
 var Comments = require('./models/comments');
+var cheerio = require('cheerio');
 
 var app = express();
 
@@ -20,7 +20,8 @@ app.configure(function (){
 
 
 app.get('/', function (req, res) {
-  res.redirect('https://github.com/karan/Hook');
+  getPostDetails();
+  res.send("done");
 });
 
 
@@ -170,20 +171,80 @@ function getComments(url, callback) {
 
 }
 
+function trim1 (str) {
+    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+}
+
 
 function getPostDetails(post_url, callback) {
   var url = post_url ? BASE_URL + post_url : BASE_URL;
-  console.log(url);
   var posts = [];
+
+  request('http://www.producthunt.com', function (error, response, body) {
+    console.log(error);
+  if (!error && response.statusCode == 200) {
+    
+    $ = cheerio.load(body);
+    var x = $('.today .posts-group tr');
+
+    var container = null;
+
+    x.each(function (rank) {
+
+      var votes = $(this).find(".upvote").text();
+      var name = $(this).find("h3.user-name").clone().children().remove().end().text().trim().replace(/"/g, "");
+      var username = $(this).find("span.user-handle").text().trim().replace(/"/g, "").match(/\(\@(.*)\)/);
+      var title = $(this).find(".post-url").text();
+      var tagline = $(this).find(".post-tagline").text();
+
+      if (container) {
+          var comment_count = $(container.find(".subhead")[2]).text().trim().match(/(\d+)/g);;
+        } else {
+          var comment_count = $(this).find(".view-discussion").text().trim().match(/(\d+)/g);
+        }
+        comment_count = comment_count ? comment_count[0] : 0; 
+
+        var permalink = post_url ? post_url : $(this).find(".view-discussion").attr("data-url");
+
+        var url = BASE_URL+$(this).find(".post-url").attr("href");
+
+        
+        request({url: BASE_URL+$(this).find(".post-url").attr("href"), followRedirect: false}, function (error, response, body) {
+          console.log(error);
+          //url = response.headers.location;
+
+          posts.push({
+            'title': title,
+            'votes': votes,
+            'user': {
+              'username': username,
+              'name': name
+            },
+            'rank': rank + 1,
+            'tagline': tagline,
+            'comment_count': comment_count,
+            'permalink': permalink,
+            'url': url
+          });
+
+          if (posts.length === x.length) {
+            callback(posts);
+          }
+        });
+    });
+  }
+});
+
+  /*
 
   jsdom.env(
     url,
-    ["http://code.jquery.com/jquery.js"],
     function (errors, window) {
       var $ = window.$;
 
       var container = post_url ? $(".modal-container") : null;
-      var $ph_posts = post_url ? $(".modal-container .posts-group tr") : $(".today tr");
+
+      var $ph_posts = window.document.getElementsByClassName('posts-group')
 
       $ph_posts.each(function (rank) {
 
@@ -228,6 +289,7 @@ function getPostDetails(post_url, callback) {
       });
     }
   );
+  */
 }
 
 app.listen(app.get('port'));
