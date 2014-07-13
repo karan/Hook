@@ -181,7 +181,6 @@ function getPostDetails(post_url, callback) {
   var posts = [];
 
   request('http://www.producthunt.com', function (error, response, body) {
-    console.log(error);
   if (!error && response.statusCode == 200) {
     
     $ = cheerio.load(body);
@@ -210,8 +209,7 @@ function getPostDetails(post_url, callback) {
 
         
         request({url: BASE_URL+$(this).find(".post-url").attr("href"), followRedirect: false}, function (error, response, body) {
-          console.log(error);
-          //url = response.headers.location;
+          url = response.headers.location;
 
           posts.push({
             'title': title,
