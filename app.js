@@ -31,7 +31,7 @@ app.get('/today', function (req, res) {
 
   Posts.findOne({date: today}, function (err, obj) {
     
-    if (obj && obj.expires < Date.now()) {
+    if (true) {
       // post expired, scrape again, and save
       console.log("posts expired - " + today);
       getPostDetails(null, function (posts) {
@@ -128,6 +128,48 @@ app.get("/posts/:slug", function (req, res) {
 
 function getComments(url, callback) {
 
+  var comments = [];
+
+  request(BASE_URL+url, function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    
+    $ = cheerio.load(body);
+    var comments_dom = $(".modal-container").find(".comment");
+
+    if (comments_dom.length === 0) {
+        return callback(null, comments);
+    }
+
+    comments_dom.each(function (index) {
+
+      var name = $(this).find(".comment-user-name a").text();
+      var username = $(this).find(".comment-user-handle").text().replace(/[{()} ]/g, '');
+      var timestamp = $(this).find(".comment-time-ago").text().replace(/\s+/g, '');
+      var comment = $(this).find(".actual-comment").find(".comment-user-name").remove().end().text().replace(/^\s+|\s+$/g,'');
+      var comment_html = $(this).find(".actual-comment").html().replace(/^\s+|\s+$/g,'');
+
+      comments.push({
+          index: index+1,
+          user: {
+            username: username,
+            name: name
+          },
+          timestamp: timestamp,
+          comment: comment,
+          comment_html: comment_html
+        });
+
+
+      if (comments.length === comments_dom.length) {
+          callback(null, comments);
+        }
+    });
+  }
+});
+
+
+
+/*
   jsdom.env(
     BASE_URL+url,
     ["http://code.jquery.com/jquery.js"],
@@ -168,13 +210,13 @@ function getComments(url, callback) {
   
     }
   );
+*/
 
 }
 
-function trim1 (str) {
-    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+function compare(a,b) {
+  return a.rank - b.rank;
 }
-
 
 function getPostDetails(post_url, callback) {
   var url = post_url ? BASE_URL + post_url : BASE_URL;
@@ -192,7 +234,8 @@ function getPostDetails(post_url, callback) {
 
       var votes = $(this).find(".upvote").text().replace(/\s+/g, '');
       var name = $(this).find("h3.user-name").clone().children().remove().end().text().trim().replace(/"/g, "");
-      var username = $(this).find("span.user-handle").text().trim().replace(/"/g, "").match(/\(\@(.*)\)/);
+      var username = $(this).find("span.user-handle").text().replace(/[() ]/g, '');
+      console.log(username);
       var title = $(this).find(".post-url").text();
       var tagline = $(this).find(".post-tagline").text();
 
@@ -209,6 +252,7 @@ function getPostDetails(post_url, callback) {
 
         
         request({url: BASE_URL+$(this).find(".post-url").attr("href"), followRedirect: false}, function (error, response, body) {
+          if (error) console.log("ERROR  " + error);
           url = response.headers.location;
 
           posts.push({
@@ -224,6 +268,8 @@ function getPostDetails(post_url, callback) {
             'permalink': permalink,
             'url': url
           });
+
+          posts.sort(compare);
 
           if (posts.length === x.length) {
             callback(posts);
@@ -232,62 +278,6 @@ function getPostDetails(post_url, callback) {
     });
   }
 });
-
-  /*
-
-  jsdom.env(
-    url,
-    function (errors, window) {
-      var $ = window.$;
-
-      var container = post_url ? $(".modal-container") : null;
-
-      var $ph_posts = window.document.getElementsByClassName('posts-group')
-
-      $ph_posts.each(function (rank) {
-
-        var votes = +$(this).find(".upvote").text();
-        var name = $(this).find("h3.user-name").clone().children().remove().end().text().trim().replace(/"/g, "");
-        var username = $(this).find("span.user-handle").text().trim().replace(/"/g, "").match(/\(\@(.*)\)/)[1];
-        var title = $(this).find(".post-url").text();
-        var tagline = $(this).find(".post-tagline").text();
-        
-        if (container) {
-          var comment_count = $(container.find(".subhead")[2]).text().trim().match(/(\d+)/g);;
-        } else {
-          var comment_count = $(this).find(".view-discussion").text().trim().match(/(\d+)/g);
-        }
-        comment_count = comment_count ? comment_count[0] : 0; 
-
-        var permalink = post_url ? post_url : $(this).find(".view-discussion").attr("data-url");
-        
-        request({url: BASE_URL+$(this).find(".post-url").attr("href"), followRedirect: false}, function (error, response, body) {
-          url = response.headers.location;
-
-          posts.push({
-            'title': title,
-            'votes': votes,
-            'user': {
-              'username': username,
-              'name': name
-            },
-            'rank': rank + 1,
-            'tagline': tagline,
-            'comment_count': comment_count,
-            'permalink': permalink,
-            'url': url
-          });
-
-          if (posts.length === $ph_posts.length) {
-            callback(posts);
-          }
-
-        });
-
-      });
-    }
-  );
-  */
 }
 
 app.listen(app.get('port'));
