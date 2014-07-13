@@ -31,7 +31,7 @@ app.get('/today', function (req, res) {
 
   Posts.findOne({date: today}, function (err, obj) {
     
-    if (obj && obj.expires < Date.now()) {
+    if (true) {
       // post expired, scrape again, and save
       console.log("posts expired - " + today);
       getPostDetails(null, function (posts) {
@@ -191,7 +191,8 @@ function getPostDetails(post_url, callback) {
 
     x.each(function (rank) {
 
-      var votes = $(this).find(".upvote").text();
+      var votes = $(this).find(".upvote").text().replace(/\s+/g, '');
+      console.log(votes);
       var name = $(this).find("h3.user-name").clone().children().remove().end().text().trim().replace(/"/g, "");
       var username = $(this).find("span.user-handle").text().trim().replace(/"/g, "").match(/\(\@(.*)\)/);
       var title = $(this).find(".post-url").text();
