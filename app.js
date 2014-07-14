@@ -1,6 +1,5 @@
 require('newrelic');
 var express = require('express');
-var jsdom = require("jsdom");
 var request = require('request');
 var db = require('./config/db');
 var Posts = require('./models/posts');

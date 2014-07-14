@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose');
 
-var dbURI = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/hook';
+var dbURI = process.env.MONGOLAB_URI;
 mongoose.connect(dbURI);
 
 // when connected with db
