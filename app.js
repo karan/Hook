@@ -20,8 +20,7 @@ app.configure(function (){
 
 
 app.get('/', function (req, res) {
-  getPostDetails();
-  res.send("done");
+  res.redirect('https://github.com/karan/Hook');
 });
 
 
