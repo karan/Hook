@@ -5,6 +5,7 @@ var request = require('request');
 var db = require('./config/db');
 var Posts = require('./models/posts');
 var Comments = require('./models/comments');
+var cheerio = require('cheerio');
 
 var app = express();
 
@@ -20,7 +21,8 @@ app.configure(function (){
 
 
 app.get('/', function (req, res) {
-  res.redirect('https://github.com/karan/Hook');
+  getPostDetails();
+  res.send("done");
 });
 
 
@@ -30,7 +32,7 @@ app.get('/today', function (req, res) {
 
   Posts.findOne({date: today}, function (err, obj) {
     
-    if (obj && obj.expires < Date.now()) {
+    if (true) {
       // post expired, scrape again, and save
       console.log("posts expired - " + today);
       getHomePosts(null, function (posts) {
@@ -128,22 +130,15 @@ app.get("/posts/:slug", function (req, res) {
 });
 
 
+// Gets the details of a single post
 function getPostDetails(post_url, callback) {
   var url = post_url ? BASE_URL + post_url : BASE_URL;
   console.log(url);
 
-  jsdom.env(
-    url,
-    ["http://code.jquery.com/jquery.js"],
-    function (errors, window) {
+  request(url, function (error, response, body) {
 
-      if (errors) {
-        console.log(errors);
-      }
-      console.log(window.title);
-      var $ = window.$;
-
-      console.log($);
+    if (!error && response.statusCode == 200) {
+      $ = cheerio.load(body);
 
       var header_dom = $(".comments-header");
 
@@ -176,100 +171,84 @@ function getPostDetails(post_url, callback) {
         });
 
       });
-
     }
-  );
+
+  });
 }
 
-
+// Returns comments for a single post
 function getComments(url, callback) {
 
-  jsdom.env(
-    BASE_URL+url,
-    ["http://code.jquery.com/jquery.js"],
-    function (errors, window) {
-      var $ = window.$;
+  var comments = [];
 
-      var comments = [];
+  request(BASE_URL+url, function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    
+    $ = cheerio.load(body);
+    var comments_dom = $(".modal-container").find(".comment");
 
-      var comments_dom = $(".comment-thread");
-
-      if (comments_dom.length === 0) {
-        return callback(null, comments);
-      }
-          
-      comments_dom.each(function (index) {
-        var this_comments = $(this).find(".comment");
-        
-        this_comments.each(function (com_count) {
-          var username = $(this).find(".comment-body").data("comment-by").match(/\(\@(.*)\)/)[1];
-          var name = $(this).find(".comment-user-name a").text();
-          var comment = $(this).find(".actual-comment").text();
-          var comment_html = $(this).find(".actual-comment").html();
-
-          console.log(username + "--" + name);
-            
-          if (com_count === 0) {
-            // Get the top level comment
-            comments.push({
-              index: index+1,
-              user: {
-                username: username,
-                name: name
-              },
-              comment: comment,
-              comment_html: comment_html,
-              children: []
-            });
-          } else {
-            // Get the child comment
-            comments[comments.length-1].children.push({
-              index: com_count+1,
-              user: {
-                username: username,
-                name: name
-              },
-              comment: comment,
-              comment_html: comment_html
-            });
-          }
-
-          if (comments.length === comments_dom.length) {
-            callback(null, comments);
-          }
-        });
-
-      });
-  
+    if (comments_dom.length === 0) {
+      return callback(null, comments);
     }
-  );
+
+    comments_dom.each(function (index) {
+
+      var name = $(this).find(".comment-user-name a").text();
+      var username = $(this).find(".comment-user-handle").text().replace(/[{()} ]/g, '');
+      var timestamp = $(this).find(".comment-time-ago").text().replace(/\s+/g, '');
+      var comment = $(this).find(".actual-comment").find(".comment-user-name").remove().end().text().replace(/^\s+|\s+$/g,'');
+      var comment_html = $(this).find(".actual-comment").html().replace(/^\s+|\s+$/g,'');
+
+      comments.push({
+        index: index+1,
+        user: {
+          username: username,
+          name: name
+        },
+        timestamp: timestamp,
+        comment: comment,
+        comment_html: comment_html
+      });
+
+
+      if (comments.length === comments_dom.length) {
+        callback(null, comments);
+      }
+    });
+  }
+});
 
 }
 
 
+function compare(a,b) {
+  return a.rank - b.rank;
+}
+
+
+// Returns all homepage posts posted today
 function getHomePosts(post_url, callback) {
   var url = post_url ? BASE_URL + post_url : BASE_URL;
-  console.log(url);
   var posts = [];
 
-  jsdom.env(
-    url,
-    ["http://code.jquery.com/jquery.js"],
-    function (errors, window) {
-      var $ = window.$;
+  request(BASE_URL, function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    
+    $ = cheerio.load(body);
+    var x = $('.today .posts-group tr');
 
-      var container = post_url ? $(".modal-container") : null;
-      var $ph_posts = post_url ? $(".modal-container .posts-group tr") : $(".today tr");
+    var container = null;
 
-      $ph_posts.each(function (rank) {
+    x.each(function (rank) {
 
-        var votes = +$(this).find(".upvote").text();
-        var name = $(this).find("h3.user-name").clone().children().remove().end().text().trim().replace(/"/g, "");
-        var username = $(this).find("span.user-handle").text().trim().replace(/"/g, "").match(/\(\@(.*)\)/)[1];
-        var title = $(this).find(".post-url").text();
-        var tagline = $(this).find(".post-tagline").text();
-        
-        if (container) {
+      var votes = $(this).find(".upvote").text().replace(/\s+/g, '');
+      var name = $(this).find("h3.user-name").clone().children().remove().end().text().trim().replace(/"/g, "");
+      var username = $(this).find("span.user-handle").text().replace(/[() ]/g, '');
+      console.log(username);
+      var title = $(this).find(".post-url").text();
+      var tagline = $(this).find(".post-tagline").text();
+
+      if (container) {
           var comment_count = $(container.find(".subhead")[2]).text().trim().match(/(\d+)/g);;
         } else {
           var comment_count = $(this).find(".view-discussion").text().trim().match(/(\d+)/g);
@@ -277,8 +256,12 @@ function getHomePosts(post_url, callback) {
         comment_count = comment_count ? comment_count[0] : 0; 
 
         var permalink = post_url ? post_url : $(this).find(".view-discussion").attr("data-url");
+
+        var url = BASE_URL+$(this).find(".post-url").attr("href");
+
         
         request({url: BASE_URL+$(this).find(".post-url").attr("href"), followRedirect: false}, function (error, response, body) {
+          if (error) console.log("ERROR  " + error);
           url = response.headers.location;
 
           posts.push({
@@ -295,17 +278,16 @@ function getHomePosts(post_url, callback) {
             'url': url
           });
 
-          console.log(posts);
+          posts.sort(compare);
 
-          if (posts.length === $ph_posts.length) {
+          if (posts.length === x.length) {
             callback(posts);
           }
-
         });
-
-      });
-    }
-  );
+    });
+  }
+});
 }
+
 
 app.listen(app.get('port'));
