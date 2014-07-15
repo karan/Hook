@@ -30,7 +30,7 @@ app.get('/today', function (req, res) {
 
   Posts.findOne({date: today}, function (err, obj) {
     
-    if (true) {
+    if (obj && obj.expires < Date.now()) {
       // post expired, scrape again, and save
       console.log("posts expired - " + today);
       getHomePosts(null, function (posts) {
