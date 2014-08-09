@@ -240,9 +240,12 @@ function getHomePosts(post_url, callback) {
     x.each(function (rank) {
 
       var votes = $(this).find(".upvote").text().replace(/\s+/g, '');
-      var name = $(this).find("h3.user-name").clone().children().remove().end().text().trim().replace(/"/g, "");
-      var username = $(this).find("span.user-handle").text().replace(/[() ]/g, '');
-      console.log(username);
+
+      var re = /(.*)\(\@(.*)\)/g;
+      var user_str = $(this).find(".user-image-td").find("h3").text().trim().replace(/\s*/g, "");
+      var user_match = re.exec(user_str)
+      var name = user_match[1]
+      var username = user_match[2];
       var title = $(this).find(".post-url").text();
       var tagline = $(this).find(".post-tagline").text();
 
