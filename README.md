@@ -7,6 +7,8 @@ ProductHunt API for retrieving today's hunts and comments for any post.
 
 Discussion on [Product Hunt](http://www.producthunt.com/posts/hook-producthunt-api).
 
+**Since official @ProductHunt API is in private beta, I'm discontinuing support for Hook. I highly recommend switching to the official API.**
+
 *Note: This is an unofficial API and __not__ supported or controlled by ProductHunt itself. Any questions, comments, feedback or feature requests should be directed to [karan](http://github.com/karan) or via an [issue](https://github.com/karan/Hook/issues) in this repo.*
 
 Usage
