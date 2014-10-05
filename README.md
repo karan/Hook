@@ -137,8 +137,7 @@ $ git push heroku master
 Donation
 =======
 
-Donations to my open source work is greatly appreciated and helps me dedicate more time and energy into making cool things. If you want to help me produce this work as well as more like it, please take a moment to contribute.
+Donations to my open source work are greatly appreciated and helps me dedicate more time and energy into making cool things. If you want to help me produce this work as well as more like it, please take a moment to contribute.
 
 - Bitcoin: 1GZqi6qUGSKGQvjd4CvVBJ9FYpsQvU2P7h
 - Gratipay: https://www.gratipay.com/karan/
-
